@@ -14,10 +14,10 @@ class Block{
 
        this.indexNum     = indexNum;
        this.timeStamp    = timeStamp;
-       this.nonce        = '';                     // don't know this yet
+       this.nonce        = '';                      // don't know this yet
        this.blockData    = blockData;
        this.previousHash = previousHash;
-       this.hash         = this.calculateHash();   // determine the hash of the current block
+       this.hash         = this.nonceBlockHash();   // determine the hash of the current block
 
     }
 
@@ -27,6 +27,26 @@ class Block{
         return SHA256( this.index + this.timeStamp + 
                        this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
 
+    }
+
+    // Define the method/function to determine the proper 'nonce' for a (new) block.
+    nonceBlockHash() {
+        // Get the hash of the block (same as 'calculateHash' above)
+        var blockHash = SHA256( this.index + this.timeStamp + 
+                                this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
+
+        // Get the leading 4 characters, which we ultimately want to be '0000'.
+        var leading4 = blockHash.slice(0,4);
+
+        // As long as the leading 4 characters are NOT '0000'', increment the 'nonce' and try again.
+        while( leading4 != "0000" ) {
+            this.nonce++;
+            blockHash = SHA256( this.index + this.timeStamp + 
+                                this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
+            leading4  = blockHash.slice(0,4);
+        }
+
+        return blockHash;
     }
 }
 
@@ -54,10 +74,7 @@ class BlockChain{
 
         // Since the properties of the current block were just changed, its hash must be
         // recomputed.
-        newBlock.hash = newBlock.calculateHash();
-
-        // Here is where we determine the value of the 'nonce'.  Check if the hash begins with
-        // '0000'.  If not, add 1 to the 'nonce' and repeat.
+        newBlock.hash = newBlock.nonceBlockHash();
 
         // Add the new block to the chain
         this.chain.push( newBlock );
@@ -75,12 +92,18 @@ class BlockChain{
 
             // Recompute the hash of the current block and make sure it matches
             if( currentBlock.hash != currentBlock.calculateHash() ) {
-                return "No, bad block hash";
+                return "No, bad block hash for block: " + i;
             }
 
             // Check that the current block's previous hash value matches the hash of the previous block.
             if( currentBlock.previousHash != previousBlock.hash ) {
-                return "No, previous hash mismatch";
+                return "No, previous hash mismatch for block: " + i;
+            }
+
+            // Check that (based on the 'nonce') the hash of the current block begins with '0000'
+            const first4 = currentBlock.hash.slice(0,4);
+            if( first4 != "0000" ) {
+                return "No, invalid nonce/hash for block: " + i;
             }
         }
 
