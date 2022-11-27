@@ -75,21 +75,21 @@ class BlockChain{
 
             // Recompute the hash of the current block and make sure it matches
             if( currentBlock.hash != currentBlock.calculateHash() ) {
-                return false;
+                return "No, bad block hash";
             }
 
             // Check that the current block's previous hash value matches the hash of the previous block.
             if( currentBlock.previousHash != previousBlock.hash ) {
-                return false;
+                return "No, previous hash mismatch";
             }
         }
 
         // If we get this far, the chain is valid.
-        return true;
+        return "yes";
     }
 }
 
-
+//////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
 // Implement the block chain.
 
@@ -100,13 +100,21 @@ bc.addBlock( new Block( 1, "11/3/2022", 0, {data_amount: 4}  ) );
 bc.addBlock( new Block( 2, "11/5/2022", 0, {data_amount: 14} ) );
 bc.addBlock( new Block( 3, "11/6/2022", 0, {data_amount: 24} ) );
 
-// Now dump out the blocks to the console
+// Dump out the chain of blocks to the console
 console.log( JSON.stringify( bc, null, 4 ) );
 
 // Verify the chain
-var valid = "false";
-if( bc.isChainValid() ) {
-    valid = "true";
-}
-
+var valid = bc.isChainValid();
 console.log( "Is the chain valid?  " + valid );
+
+// Alter the data in block 2, to invalidate the chain.
+bc.chain[2].blockData = {data_amount: 15};
+bc.chain[2].hash      = bc.chain[2].calculateHash();   // recalculate the hash, attempting to cover up the data change
+
+console.log( " " );
+console.log( "/////////////////////////////" );
+console.log( "Altered chain is now:" );
+console.log( JSON.stringify( bc, null, 4 ) );
+var valid = bc.isChainValid();
+console.log( "Is the chain valid?  " + valid );
+
