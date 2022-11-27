@@ -49,7 +49,7 @@ class BlockChain{
 
     // Method to add a new block to the chain.
     addBlock( newBlock ) {
-        // Set the value of the previous block's hash
+        // Set the value of the previous block's hash in the current block
         newBlock.previousHash = this.getLatestBlock().hash;
 
         // Since the properties of the current block were just changed, its hash must be
@@ -63,6 +63,30 @@ class BlockChain{
         this.chain.push( newBlock );
     }
 
+    // Add validation for the chain.
+    isChainValid() {
+        // No need to check the first block (index = 0) since we manually created it.
+
+        // Loop over all the blocks in the chain and verify their data.
+        for( let i = 1; i < this.chain.length; i++ ) {
+            // Grab the current and previous blocks
+            const currentBlock  = this.chain[i];
+            const previousBlock = this.chain[i-1];
+
+            // Recompute the hash of the current block and make sure it matches
+            if( currentBlock.hash != currentBlock.calculateHash() ) {
+                return false;
+            }
+
+            // Check that the current block's previous hash value matches the hash of the previous block.
+            if( currentBlock.previousHash != previousBlock.hash ) {
+                return false;
+            }
+        }
+
+        // If we get this far, the chain is valid.
+        return true;
+    }
 }
 
 
@@ -78,3 +102,11 @@ bc.addBlock( new Block( 3, "11/6/2022", 0, {data_amount: 24} ) );
 
 // Now dump out the blocks to the console
 console.log( JSON.stringify( bc, null, 4 ) );
+
+// Verify the chain
+var valid = "false";
+if( bc.isChainValid() ) {
+    valid = "true";
+}
+
+console.log( "Is the chain valid?  " + valid );
