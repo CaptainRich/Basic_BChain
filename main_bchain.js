@@ -3,6 +3,9 @@
 // Import the crypto-hashing function from the nodejs package.
 const SHA256 = require( 'crypto-js/sha256');
 
+// Import the 'moment' library for date/time functions.
+const moment = require( 'moment' );
+
 // Define what a "block" looks like/contains.
 class Block{
     constructor( indexNum, timeStamp, nonce, blockData, previousHash = "" ) {
@@ -59,7 +62,8 @@ class BlockChain{
 
     // The first block on a chain is the "genesis" block and is created manually.
     createGenesisBlock() {
-        return new Block(  0, "11/27/2022", 0, "Genesis Block", "0" );
+        let timestamp = moment().format();
+        return new Block(  0, timestamp, 0, "Genesis Block", "0" );
     }
 
     // Method to get/return the last block.
@@ -116,12 +120,18 @@ class BlockChain{
 //////////////////////////////////////////////////////////////////////////////////////
 // Implement the block chain.
 
-let bc = new BlockChain();             // this will also add/create the genesis block
+let bc        = new BlockChain();             // this will also add/create the genesis block
+let timestamp = 0;
 
 // Add a few more blocks (note we make up the data here).
-bc.addBlock( new Block( 1, "11/3/2022", 0, {data_amount: 4}  ) );
-bc.addBlock( new Block( 2, "11/5/2022", 0, {data_amount: 14} ) );
-bc.addBlock( new Block( 3, "11/6/2022", 0, {data_amount: 24} ) );
+timestamp = moment().format();
+bc.addBlock( new Block( 1, timestamp, 0, {data_amount: 4}  ) );
+
+timestamp = moment().format();
+bc.addBlock( new Block( 2, timestamp, 0, {data_amount: 14} ) );
+
+timestamp = moment().format();
+bc.addBlock( new Block( 3, timestamp, 0, {data_amount: 24} ) );
 
 // Dump out the chain of blocks to the console
 console.log( JSON.stringify( bc, null, 4 ) );
