@@ -20,8 +20,9 @@ This program is an example of how to setup a block chain.  Details of a block ch
 - how is the block chain verified
 
 ## Technologies Used
-* The NPM package crypto-js.
-* The NPM package moment.
+* The NPM package crypto-js for hashing functions.
+* The NPM package moment for time/date functions.
+* The NPM package elliptic for private/public key generation.
 
 ## Program Logic
 As the application starts (from the command line with 'node main_bchain').
