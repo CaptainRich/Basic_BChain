@@ -7,6 +7,7 @@ Richard Ay, November 2022
 * [Project Objective](#project-objective)
 * [Technologies Used](#technologies-used)
 * [Program Logic](#program-logic)
+* [References](#references)
 * [Application Screen Shot](#application-screen-shot)
 
 
@@ -29,6 +30,11 @@ The first operation is the instantiation of a new 'block chain', which also crea
 The program then dumps the chain to the terminal using 'console.log'.  The data can be visually verified proving the chain is valid.  The program then invokes its own 'validate' function to perform a series of checks on each block in the chain.  The checks performed are: is the block's hash is recomputed to verify it is the correct value, the block's previous hash value is compared to the previous block, the block's hash is check to verify it begins with '0000'.
 
 The program then manually changes the data in block #2 and the validation function is used again, proving the validation function actually works.
+
+## References
+1) Block chain demo by Anders Brownworth: http://https://andersbrownworth.com/blockchain/
+2) Create a blockchain in JavaScript: http://https://www.youtube.com/watch?v=zVqczFZr124
+3) Block chain Basics and Cryptography, MIT Open Courseware: http://https://www.youtube.com/watch?v=zVqczFZr124
 
 ## Application Screen Shot
 ![Basic_BChain Image](./screen-capture.jpg)
