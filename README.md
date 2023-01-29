@@ -26,6 +26,7 @@ This program is an example of how to setup a block chain.  Details of a block ch
 
 ## Program Logic
 As the application starts (from the command line with 'node main_bchain').
+Public/Private keys can be generated from the command line with 'node keygenerator'.
 
 The first operation is the instantiation of a new 'block chain', which also creates the 'genesis' block.  The program then adds three more blocks, with hard-wired data to the chain.  As each block is created, it's proper hash value is determined such that the hash begins with '0000'.  This is accomplished by incrementing the 'nonce' value until the resulting hash meets the '0000' criteria.  Additionally, 'moment()' is used to obtain the current date/time, used as the block's timestamp.
 
@@ -35,7 +36,7 @@ The program then manually changes the data in block #2 and the validation functi
 
 ## References
 1) Block chain demo by Anders Brownworth: http://https://andersbrownworth.com/blockchain/
-2) Create a blockchain in JavaScript: http://https://www.youtube.com/watch?v=zVqczFZr124
+2) Create a blockchain in JavaScript: https://www.youtube.com/watch?v=zVqczFZr124
 3) Block chain Basics and Cryptography, MIT Open Courseware: http://https://www.youtube.com/watch?v=zVqczFZr124
 
 ## Application Screen Shot

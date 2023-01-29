@@ -15,7 +15,7 @@ let timestamp = 0;
 
 // Add a few more blocks (note we make up the data here).
 timestamp = moment().format();
-bc.addBlock( new Block( 1, timestamp, 0, {data_amount: 4, user: 'tom'}  ) );
+bc.addBlock( new Block( 1, timestamp, 0, {data_amount: 34, user: 'tom'}  ) );
 
 timestamp = moment().format();
 bc.addBlock( new Block( 2, timestamp, 0, {data_amount: 14, user: 'dick'} ) );
@@ -35,8 +35,10 @@ bc.chain[2].blockData = {data_amount: 15, user: 'hacker'};
 bc.chain[2].hash      = bc.chain[2].calculateHash();   // recalculate the hash, attempting to cover up the data change
 
 console.log( " " );
-console.log( "/////////////////////////////" );
-console.log( "Altered chain is now:" );
+console.log( " " );
+console.log( " " );
+console.log( "///////////////////////////////////////////////////////////////" );
+console.log( "Altered (hacked) chain is now:" );
 console.log( JSON.stringify( bc, null, 4 ) );
 var valid = bc.isChainValid();
 console.log( "Is the chain valid?  " + valid );

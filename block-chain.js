@@ -9,10 +9,11 @@ const moment = require( 'moment' );
 // Define what a "block" looks like/contains.
 class Block{
     constructor( indexNum, timeStamp, nonce, blockData, previousHash = "" ) {
-       // indexNum     - the number of the block in the chain
+       // indexNum     - the number of the block in the chain (not really needed since the position of the 
+       //                block in the chain determines the block number.)
        // timeStamp    - the date/time the block was created/added to the chain
-       // nonce        - a random number determined to make the hash start with '0000'
-       // blockData    - the data contained in the block - this can be complex
+       // nonce        - a random number determined to make the hash start with '0000' (num_zeros)
+       // blockData    - the data contained in the block - this can be complex (tokens, transactions, etc.)
        // previousHash - the hash of the previous/preceding block, to insure integrity of the chain
 
        this.indexNum     = indexNum;
@@ -34,19 +35,27 @@ class Block{
 
     // Define the method/function to determine the proper 'nonce' for a (new) block.
     nonceBlockHash() {
+
+        // Number of leading zeros needed in the hash.  If this is changed, make the same change below
+        // in the isChainValid method.
+        var num_zeros = 4;           
+
+        // Get a string with the needed number of zeros.
+        var needed_zeros = Array(num_zeros+1).join("0");
+
         // Get the hash of the block (same as 'calculateHash' above)
         var blockHash = SHA256( this.index + this.timeStamp + 
                                 this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
 
         // Get the leading 4 characters, which we ultimately want to be '0000'.
-        var leading4 = blockHash.slice(0,4);
+        var leadingZ = blockHash.slice(0,num_zeros);
 
-        // As long as the leading 4 characters are NOT '0000'', increment the 'nonce' and try again.
-        while( leading4 != "0000" ) {
+        // As long as the leading 'num_zeros' characters are NOT all zeroes, increment the 'nonce' and try again.      
+        while( leadingZ != needed_zeros ) {
             this.nonce++;
             blockHash = SHA256( this.index + this.timeStamp + 
                                 this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
-            leading4  = blockHash.slice(0,4);
+            leadingZ  = blockHash.slice(0,num_zeros);
         }
 
         return blockHash;
@@ -60,7 +69,8 @@ class BlockChain{
         this.chain = [ this.createGenesisBlock() ];
     }
 
-    // The first block on a chain is the "genesis" block and is created manually.
+    // The first block on a chain is the "genesis" block and is created manually.  
+    // The "index", "nonce" and "previous hash" are set to zero.
     createGenesisBlock() {
         let timestamp = moment().format();
         return new Block(  0, timestamp, 0, "Genesis Block", "0" );
@@ -88,7 +98,7 @@ class BlockChain{
     isChainValid() {
         // No need to check the first block (index = 0) since we manually created it.
 
-        // Loop over all the blocks in the chain and verify their data.
+        // Loop over all the blocks in the chain and verify their data.  (Skip the 'genesis' block.)
         for( let i = 1; i < this.chain.length; i++ ) {
             // Grab the current and previous blocks
             const currentBlock  = this.chain[i];
@@ -105,8 +115,15 @@ class BlockChain{
             }
 
             // Check that (based on the 'nonce') the hash of the current block begins with '0000'
-            const first4 = currentBlock.hash.slice(0,4);
-            if( first4 != "0000" ) {
+            // Number of leading zeros needed in the hash.  If this is changed, make the same change above
+            // in the nonceBlock method.
+            var num_zeros = 4;           
+
+            // Get a string with the needed number of zeros.
+            var needed_zeros = Array(num_zeros+1).join("0");
+
+            const first4 = currentBlock.hash.slice(0,num_zeros);
+            if( first4 != needed_zeros ) {
                 return "No, invalid nonce/hash for block: " + i;
             }
         }
