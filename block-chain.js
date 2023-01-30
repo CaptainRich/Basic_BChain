@@ -6,6 +6,12 @@ const SHA256 = require( 'crypto-js/sha256');
 // Import the 'moment' library for date/time functions.
 const moment = require( 'moment' );
 
+// Import the library for private/public key generation
+const EC = require( 'elliptic').ec;
+
+// Create an instance of the elliptic library
+const ec = new EC( 'secp256k1' );     // specify the elliptic curve to use
+
 // Define what a "block" looks like/contains.
 class Block{
     constructor( indexNum, timeStamp, nonce, blockData, previousHash = "" ) {
@@ -60,7 +66,42 @@ class Block{
 
         return blockHash;
     }
-}
+
+    // Obtain the hash of the block's data, which is what will be 'signed" with the private key.
+    blockDataHash() {
+        return SHA256( this.blockData ).toString();
+    }
+
+    // Setup the signing activity
+    signBlockData( signingKey ) {
+
+        // Verify the public keys match
+        if( signingKey.getPUblic( 'hex' ) !== this.publicKey ) {
+            throw new Error( 'You cannot sign a blockData that is not yours');
+        }
+
+        // Get the hash of the current block's data
+        const hashData = this.blockDataHash();
+
+        // Sign the data
+        const signed = signingKey.sign( hashData, 'base64' );
+        this.signature = signed.toDer( 'hex' );                    // 'toDer' is an encoding format
+    }
+
+    // Verify that the signing succeeded.
+    isSigningValid() {
+        if( this.publicKey === null )
+            return true;                // possible in the mining reward instance
+
+        if( !this.signature || this.signature.length === 0 )
+            throw new Error( 'No signature in this block/transaction.' );
+
+        /// The data has a signature, verify it is the correct signature.
+        const publicKey = ec.keyFromPublic( this.publicKey, 'hex' );
+        return publicKey.verify( this.calculateHash(), this.signature );
+
+    }
+
 
 // Define what a "block chain" looks like/contains, and its methods.
 class BlockChain{
