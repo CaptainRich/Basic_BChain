@@ -1,6 +1,6 @@
 // Classes for block chain manipulation.
 
-// Import the crypto-hashing function from the nodejs package.
+// Import the crypto-hashing function from the nodejs package.  Note that "crypto-js" must be installed from "npm".
 const SHA256 = require( 'crypto-js/sha256');
 
 // Import the 'moment' library for date/time functions.
@@ -101,7 +101,7 @@ class Block{
         return publicKey.verify( this.calculateHash(), this.signature );
 
     }
-
+}
 
 // Define what a "block chain" looks like/contains, and its methods.
 class BlockChain{
