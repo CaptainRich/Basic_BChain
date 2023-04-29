@@ -50,8 +50,9 @@ class Block{
         var needed_zeros = Array(num_zeros+1).join("0");
 
         // Get the hash of the block (same as 'calculateHash' above)
-        var blockHash = SHA256( this.index + this.timeStamp + 
-                                this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
+        // var blockHash = SHA256( this.index + this.timeStamp + 
+        //                         this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
+        var blockHash = this.calculateHash();
 
         // Get the leading 4 characters, which we ultimately want to be '0000'.
         var leadingZ = blockHash.slice(0,num_zeros);
@@ -59,8 +60,9 @@ class Block{
         // As long as the leading 'num_zeros' characters are NOT all zeroes, increment the 'nonce' and try again.      
         while( leadingZ != needed_zeros ) {
             this.nonce++;
-            blockHash = SHA256( this.index + this.timeStamp + 
-                                this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
+            // blockHash = SHA256( this.index + this.timeStamp + 
+            //                     this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
+            blockHash = calculateHash();
             leadingZ  = blockHash.slice(0,num_zeros);
         }
 
