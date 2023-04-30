@@ -12,6 +12,9 @@ const EC = require( 'elliptic').ec;
 // Create an instance of the elliptic library
 const ec = new EC( 'secp256k1' );     // specify the elliptic curve to use
 
+// Define the size of the "nonce", the number of leading zeroes the block's hash must start with
+const num_zeros = 4;
+
 // Define what a "block" looks like/contains.
 class Block{
     constructor( indexNum, timeStamp, nonce, blockData, previousHash = "" ) {
@@ -39,12 +42,8 @@ class Block{
 
     }
 
-    // Define the method/function to determine the proper 'nonce' for a (new) block.
-    nonceBlockHash() {
-
-        // Number of leading zeros needed in the hash.  If this is changed, make the same change below
-        // in the isChainValid method.
-        var num_zeros = 4;           
+    // Define the method/function to determine the proper 'nonce' for a (new) block.  The block's hash is supposed to start with 4 zeroes.  This is one of the requirements of a valid block.  Some call this process "mining".
+    nonceBlockHash() {       
 
         // Get a string with the needed number of zeros.
         var needed_zeros = Array(num_zeros+1).join("0");
@@ -158,10 +157,7 @@ class BlockChain{
             }
 
             // Check that (based on the 'nonce') the hash of the current block begins with '0000'
-            // Number of leading zeros needed in the hash.  If this is changed, make the same change above
-            // in the nonceBlock method.
-            var num_zeros = 4;           
-
+            // Number of leading zeros needed in the hash.    
             // Get a string with the needed number of zeros.
             var needed_zeros = Array(num_zeros+1).join("0");
 

@@ -36,10 +36,11 @@ The program then manually changes the data in block #2 and the validation functi
 
 ## References
 1) Block chain demo by Anders Brownworth: http://https://andersbrownworth.com/blockchain/
-2) Create a blockchain in JavaScript: https://www.youtube.com/watch?v=zVqczFZr124
+2) Creating a blockchain in JavaScript: https://www.youtube.com/watch?v=zVqczFZr124
    This is a series of videos:
    a) Block Chain basics
    b) Proof of Work (setting up the 'nonce')
+   c) Rewards & Transactions
 3) Block chain Basics and Cryptography, MIT Open Courseware: http://https://www.youtube.com/watch?v=zVqczFZr124
 
 ## Application Screen Shot
