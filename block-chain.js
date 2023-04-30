@@ -17,7 +17,7 @@ const num_zeros = 4;
 
 // Define what the block's data looks like (this could be a transaction in the cyrpto-currency arena).
 // Transactions are typically "from" someone, "to" someone.
-class BlockData{
+class Transaction{
     constructor( fromAddress, toAddress, dataAmount ){
         this.fromAddress = fromAddress;
         this.toAddress   = toAddress;
@@ -27,7 +27,8 @@ class BlockData{
 
 // Define what a "block" looks like/contains.
 class Block{
-    constructor( indexNum, timeStamp, nonce, blockData, previousHash = "" ) {
+    //constructor( indexNum, timeStamp, nonce, transactions, previousHash = "" ) {
+    constructor( timeStamp, transactions, previousHash = "" ) {
        // indexNum     - the number of the block in the chain (not really needed since the position of the 
        //                block in the chain determines the block number.)
        // timeStamp    - the date/time the block was created/added to the chain
@@ -35,10 +36,10 @@ class Block{
        // blockData    - the data contained in the block - this can be complex (tokens, transactions, etc.)
        // previousHash - the hash of the previous/preceding block, to insure integrity of the chain
 
-       this.indexNum     = indexNum;
+       //this.indexNum     = indexNum;
        this.timeStamp    = timeStamp;
-       this.nonce        = '';                      // don't know this yet
-       this.blockData    = blockData;
+       this.nonce        = 0;                      // don't know this yet
+       this.transactions = transactions;
        this.previousHash = previousHash;
        this.hash         = this.nonceBlockHash();   // determine the hash of the current block
 
@@ -47,9 +48,7 @@ class Block{
     // Define the method/function to compute he hash of the current block
     calculateHash() {
         // Use the hashing function to compute the hash of the block, returned as a string
-        return SHA256( this.index + this.timeStamp + 
-                       this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
-
+        return SHA256( this.timeStamp +  this.nonce + JSON.stringify(this.transactions) + this.previousHash ).toString();
     }
 
     // Define the method/function to determine the proper 'nonce' for a (new) block.  The block's hash is supposed to start with 4 zeroes.  This is one of the requirements of a valid block.  Some call this process "mining".
@@ -119,13 +118,15 @@ class BlockChain{
     constructor(){
         // The block chain is an array of blocks, the first of which is the 'genesis block".
         this.chain = [ this.createGenesisBlock() ];
+        this.pendingTransactions = [];                // defined as an empty array
+        this.miningReward        = 10;                // the reward for creating (mining) a block
     }
 
     // The first block on a chain is the "genesis" block and is created manually.  
     // The "index", "nonce" and "previous hash" are set to zero.
     createGenesisBlock() {
         let timestamp = moment().format();
-        return new Block(  0, timestamp, 0, "Genesis Block", "0" );
+        return new Block(  timestamp, "Genesis Block", "0" );
     }
 
     // Method to get/return the last block.
@@ -133,18 +134,69 @@ class BlockChain{
         return this.chain[ this.chain.length-1 ];
     }
 
-    // Method to add a new block to the chain.
-    addBlock( newBlock, toAddress ) {
-        // Set the value of the previous block's hash in the current block
-        newBlock.previousHash = this.getLatestBlock().hash;
+    // This is the initial function to create a block.
+    // Method to add a new block to the chain.  "Mining" is the action of determining and adding the 'nonce'.
+    // addBlock( newBlock, toAddress ) {
+    //     // Set the value of the previous block's hash in the current block
+    //     newBlock.previousHash = this.getLatestBlock().hash;
 
-        // Since the properties of the current block were just changed, its hash must be
-        // recomputed.
-        newBlock.hash = newBlock.nonceBlockHash();
+    //     // Since the properties of the current block were just changed, its hash must be
+    //     // recomputed.
+    //     newBlock.hash = newBlock.nonceBlockHash();    'mine' the block
 
-        // Add the new block to the chain
-        this.chain.push( newBlock );
+    //     // Add the new block to the chain
+    //     this.chain.push( newBlock );
+    // }
+
+    // Mine (create,add) a new block.
+    minePendingTransactions( miningRewardAddress ){
+
+        console.log( "In 'minePendingTransactions' ..." );
+        console.log( "pendingTransactions: \n" );
+        console.log( this.pendingTransactions );
+
+
+        // miningRewardAddress  - the address of the miner's wallet where the reward is sent if mining is successful.
+        let block = new Block( Date.now(), this.pendingTransactions );
+        block.nonceBlockHash();
+        console.log( "block mined: ", block );
+       
+
+        this.chain.push( block );
+        this.pendingTransactions = [
+            new Transaction( null, miningRewardAddress, this.miningReward )  // no "fromAddress" when creating (mining) a block
+        ];
+
+        console.log( "New block added (mined)." );
+        console.log( "mining transaction added to pending: ", this.pendingTransactions );
     }
+
+    // Put the current transaction into the "pending" array
+    createTransaction( transaction ){
+        this.pendingTransactions.push( transaction );
+    }
+
+    // Determine the balance of a specified address.
+    getBalanceOfAddress( address ){
+        let balance = 0;
+
+        // Loop over all of the transactions in all of the blocks, looking for the specified address.  Update the balance accordingly.
+        for( const block of this.chain ){
+            for( const trans of block.transactions ) {
+                if( trans.fromAddress == address ){
+                   balance -= trans.dataAmount;            // reduce the balance since an amount was "sent". 
+                }
+
+                if( trans.toAddress == address ){
+                    balance += trans.dataAmount;           // increase the balance since an amount is "received".
+                }
+            }
+        }
+
+        return balance;
+
+    }
+
 
     // Add validation for the chain.
     isChainValid() {
@@ -185,4 +237,4 @@ class BlockChain{
 
 module.exports.BlockChain = BlockChain;
 module.exports.Block      = Block;
-module.exports.BlockData  = BlockData;
+module.exports.Transaction  = Transaction;
