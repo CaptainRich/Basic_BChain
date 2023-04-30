@@ -1,7 +1,7 @@
 // This is the main file for the Basic_Block_Chain demo program.
 
 // Import our block chain classes
-const {BlockChain, Block} = require( './block-chain.js' );
+const {BlockChain, Block, BlockData} = require( './block-chain.js' );
 
 // Import the 'moment' library for date/time functions.
 const moment = require( 'moment' );
@@ -12,16 +12,17 @@ const moment = require( 'moment' );
 
 let bc        = new BlockChain();             // this will also add/create the genesis block
 let timestamp = 0;
+let toAddress = 0;
 
 // Add a few more blocks (note we make up the data here).
 timestamp = moment().format();
-bc.addBlock( new Block( 1, timestamp, 0, {data_amount: 34, user: 'tom'}  ) );
+bc.addBlock( new Block( 1, timestamp, 0, {data_amount: 34, user: 'tom'}  ), toAddress );
 
 timestamp = moment().format();
-bc.addBlock( new Block( 2, timestamp, 0, {data_amount: 14, user: 'dick'} ) );
+bc.addBlock( new Block( 2, timestamp, 0, {data_amount: 14, user: 'dick'} ), toAddress );
 
 timestamp = moment().format();
-bc.addBlock( new Block( 3, timestamp, 0, {data_amount: 24, user: 'harry'} ) );
+bc.addBlock( new Block( 3, timestamp, 0, {data_amount: 24, user: 'harry'} ), toAddress );
 
 // Dump out the chain of blocks to the console
 console.log( JSON.stringify( bc, null, 4 ) );

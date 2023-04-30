@@ -15,6 +15,16 @@ const ec = new EC( 'secp256k1' );     // specify the elliptic curve to use
 // Define the size of the "nonce", the number of leading zeroes the block's hash must start with
 const num_zeros = 4;
 
+// Define what the block's data looks like (this could be a transaction in the cyrpto-currency arena).
+// Transactions are typically "from" someone, "to" someone.
+class BlockData{
+    constructor( fromAddress, toAddress, dataAmount ){
+        this.fromAddress = fromAddress;
+        this.toAddress   = toAddress;
+        this.dataAmount  = dataAmount;
+    }
+}
+
 // Define what a "block" looks like/contains.
 class Block{
     constructor( indexNum, timeStamp, nonce, blockData, previousHash = "" ) {
@@ -124,7 +134,7 @@ class BlockChain{
     }
 
     // Method to add a new block to the chain.
-    addBlock( newBlock ) {
+    addBlock( newBlock, toAddress ) {
         // Set the value of the previous block's hash in the current block
         newBlock.previousHash = this.getLatestBlock().hash;
 
@@ -175,3 +185,4 @@ class BlockChain{
 
 module.exports.BlockChain = BlockChain;
 module.exports.Block      = Block;
+module.exports.BlockData  = BlockData;
