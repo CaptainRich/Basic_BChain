@@ -62,7 +62,7 @@ class Block{
             this.nonce++;
             // blockHash = SHA256( this.index + this.timeStamp + 
             //                     this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
-            blockHash = calculateHash();
+            blockHash = this.calculateHash();
             leadingZ  = blockHash.slice(0,num_zeros);
         }
 
