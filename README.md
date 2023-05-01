@@ -47,7 +47,8 @@ The program then manually changes the data in block #2 and the validation functi
    a) Block Chain basics
    b) Proof of Work (setting up the 'nonce')
    c) Rewards & Transactions
+   d) signing transactions
 3) Block chain Basics and Cryptography, MIT Open Courseware: http://https://www.youtube.com/watch?v=zVqczFZr124
 
 ## Application Screen Shot
-![Basic_BChain Image](./block_chain.jpg)
+![Basic_BChain Image](./block_chain.jpg)  The initial output before transactions and signing.
