@@ -23,6 +23,46 @@ class Transaction{
         this.toAddress   = toAddress;
         this.dataAmount  = dataAmount;
     }
+
+    // Compute the hash of this transaction
+    calculateHash(){
+        return SHA256( this.fromAddress + this.toAddress + this.dataAmount ).toString();
+    }
+
+    // Method to "sign" a transaction - this protects the transaction from illicit modification
+    signTransaction( signingKey ){           // 'signingKey' is an object with both public/private keys
+       
+        // Verify the public keys match
+        if( signingKey.getPublic( 'hex' ) !== this.fromAddress ) {
+            throw new Error( 'You cannot sign a transaction that is not yours.');
+        }
+
+        const hashTransaction = this.calculateHash();
+        const signature       = signingKey.sign( hashTransaction, 'base64' );
+        console.log( "Signing transaction with a hash value of: ", hashTransaction );
+        console.log( "Signature for the hash is: ", signature );
+
+        // Store the signature in this transaction
+        this.signature = signature.toDER( 'hex' );                // 'toDer' is an encoding format
+        console.log( "Signed Transaction with a signature of: ", this.signature );
+    }
+
+    // Method to verify a transaction has been properly signed.
+    isValid(){
+        // Assume if there is no "fromAddress" this transaction is from the 'mining' activity
+        if(this.fromAddress === null ) return true;               
+        
+        if( !this.signature || this.signature.length ===0 ) {
+            console.log( "FromAddress: ", this.fromAddress );
+            console.log( "ToAddress  : ", this.toAddress );
+            console.log( "Amount     : ", this.dataAmount );
+            throw new Error( 'No signature in this transaction.' );
+        }
+
+        // Check that the transaction was signed with the correct key.
+        const publicKey = ec.keyFromPublic( this.fromAddress, 'hex' );
+        return publicKey.verify( this.calculateHash(), this.signature );
+    }
 }
 
 // Define what a "block" looks like/contains.
@@ -77,39 +117,17 @@ class Block{
         return blockHash;
     }
 
-    // Obtain the hash of the block's data, which is what will be 'signed" with the private key.
-    blockDataHash() {
-        return SHA256( this.blockData ).toString();
-    }
+    // Verify the block contains valid transactions.
+    hasValidTransactions() {
 
-    // Setup the signing activity
-    signBlockData( signingKey ) {
-
-        // Verify the public keys match
-        if( signingKey.getPUblic( 'hex' ) !== this.publicKey ) {
-            throw new Error( 'You cannot sign a blockData that is not yours');
+        // Loop over all the transactions in the block
+        for( const transact of this.transactions ){
+            if( !transact.isValid() ){
+                return false;
+            }
         }
 
-        // Get the hash of the current block's data
-        const hashData = this.blockDataHash();
-
-        // Sign the data
-        const signed = signingKey.sign( hashData, 'base64' );
-        this.signature = signed.toDer( 'hex' );                    // 'toDer' is an encoding format
-    }
-
-    // Verify that the signing succeeded.
-    isSigningValid() {
-        if( this.publicKey === null )
-            return true;                // possible in the mining reward instance
-
-        if( !this.signature || this.signature.length === 0 )
-            throw new Error( 'No signature in this block/transaction.' );
-
-        /// The data has a signature, verify it is the correct signature.
-        const publicKey = ec.keyFromPublic( this.publicKey, 'hex' );
-        return publicKey.verify( this.calculateHash(), this.signature );
-
+        return true;       // all the transactions in the block are valid
     }
 }
 
@@ -119,7 +137,7 @@ class BlockChain{
         // The block chain is an array of blocks, the first of which is the 'genesis block".
         this.chain = [ this.createGenesisBlock() ];
         this.pendingTransactions = [];                // defined as an empty array
-        this.miningReward        = 10;                // the reward for creating (mining) a block
+        this.miningReward        = 100;               // the reward for creating (mining) a block
     }
 
     // The first block on a chain is the "genesis" block and is created manually.  
@@ -158,6 +176,7 @@ class BlockChain{
 
         // miningRewardAddress  - the address of the miner's wallet where the reward is sent if mining is successful.
         let block = new Block( Date.now(), this.pendingTransactions );
+        block.previousHash = this.getLatestBlock().hash;
         block.nonceBlockHash();
         console.log( "block mined: ", block );
        
@@ -172,7 +191,19 @@ class BlockChain{
     }
 
     // Put the current transaction into the "pending" array
-    createTransaction( transaction ){
+    addTransaction( transaction ){
+
+        // Verify the transaction has from/to addresses before adding to the 'pending' array
+        if( !transaction.fromAddress || !transaction.toAddress ){
+            throw new Error( 'Transactions must have both from/to addresses. ' );
+        }
+
+        // Verify the transaction is valid before adding to the 'pending' array
+        if( !transaction.isValid() ){
+            throw new Error( 'Cannot add invalid transactions.' );
+        }
+
+        // All ok, add the transaction to the "pending" array.
         this.pendingTransactions.push( transaction );
     }
 
@@ -208,6 +239,12 @@ class BlockChain{
             const currentBlock  = this.chain[i];
             const previousBlock = this.chain[i-1];
 
+            // Verify that all of the transactions in the current block are valid
+            if( !currentBlock.hasValidTransactions() ){
+                console.log( "This block has invalid transactions: " + i );
+                return false;
+            }
+
             // Recompute the hash of the current block and make sure it matches
             if( currentBlock.hash != currentBlock.calculateHash() ) {
                 return "No, bad block hash for block: " + i;
@@ -235,6 +272,5 @@ class BlockChain{
 }
 
 
-module.exports.BlockChain = BlockChain;
-module.exports.Block      = Block;
-module.exports.Transaction  = Transaction;
+module.exports.BlockChain  = BlockChain;
+module.exports.Transaction = Transaction;

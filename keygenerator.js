@@ -13,5 +13,5 @@ const privateKey = key.getPrivate( 'hex' );     // extract the 'private' key
 
 // Display the public/private keys
 console.log();
-console.log( 'Public key is: ', publicKey );
+console.log( 'Public key is : ', publicKey );
 console.log( 'Private key is: ', privateKey );

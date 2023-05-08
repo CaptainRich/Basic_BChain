@@ -1,31 +1,51 @@
 // This is the main file for the Basic_Block_Chain demo program.
 
 // Import our block chain classes
-const {BlockChain, Block, Transaction} = require( './block-chain.js' );
+const {BlockChain, Transaction} = require( './block-chain.js' );
 
 // Import the 'moment' library for date/time functions.
 const moment = require( 'moment' );
 
-//////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////
-// Implement the block chain.
+// Import the library for private/public key generation
+const EC = require( 'elliptic').ec;
 
+// Create an instance of the elliptic library
+const ec = new EC( 'secp256k1' );     // specify the elliptic curve to use
+
+// Import the DOTENV package to utilize the secret keys in '.env'
+require( 'dotenv' ).config();
+
+//////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////
+
+// Setup the public/private keys to be used.
+const objKey1        = ec.keyFromPrivate( process.env.Private_key_1 );
+const walletAddress1 = objKey1.getPublic( 'hex' );
+const objKey2        = ec.keyFromPrivate( process.env.Private_key_2 );
+const walletAddress2 = objKey2.getPublic( 'hex' );
+
+// Implement the block chain.
 let bc        = new BlockChain();             // this will also add/create the genesis block
 
 // Create transactions for the block chain.  The addresses here are public keys to an individual's wallet.
-bc.createTransaction( new Transaction( 'address1', 'address2', 150 ) );
-bc.createTransaction( new Transaction( 'address2', 'address1', 40 ) );
+const trans1 = new Transaction( walletAddress1, walletAddress2, 25 );
+trans1.signTransaction( objKey1 );
+bc.addTransaction( trans1 );
+
+// const trans2 = new Transaction( walletAddress2, walletAddress1, 40 );
+// trans2.signTransaction( objKey2 );
+// bc.addTransaction( trans2 );
 
 // Now the transactions must be added to a block (mined).
 console.log( "\nStarting the mining process ..." );
-bc.minePendingTransactions( 'miners-address' );
-console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( 'miners-address' ) );
+bc.minePendingTransactions( walletAddress1 );
+console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
 
 console.log( "\nStarting the mining process again ..." );
-bc.minePendingTransactions( 'miners-address' );
-console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( 'miners-address' ) );
+bc.minePendingTransactions( walletAddress1 );
+console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
 
-
+console.log( "Is the blockchain valid?", bc.isChainValid() );
 
 
 // This is the initial code, before adding 'transactions', that manually created the blocks in the chain.
