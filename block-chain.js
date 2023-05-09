@@ -39,12 +39,9 @@ class Transaction{
 
         const hashTransaction = this.calculateTHash();
         const signature       = signingKey.sign( hashTransaction, 'base64' );
-        console.log( "Signing transaction with a hash value of: ", hashTransaction );
-        console.log( "Signature for the hash is: ", signature );
 
         // Store the signature in this transaction
         this.signature = signature.toDER( 'hex' );                // 'toDer' is an encoding format
-        console.log( "Signed Transaction with a signature of: ", this.signature );
     }
 
     // Method to verify a transaction has been properly signed.
@@ -162,25 +159,22 @@ class BlockChain{
     // Mine (create,add) a new block.
     minePendingTransactions( miningRewardAddress ){
 
-        console.log( "In 'minePendingTransactions' ..." );
-        console.log( "Pending Transactions are: \n" );
-        console.log( this.pendingTransactions );
+        // console.log( "In 'minePendingTransactions' ..." );
+        // console.log( "Pending Transactions are: \n" );
+        // console.log( this.pendingTransactions );
 
 
         // miningRewardAddress  - the address of the miner's wallet where the reward is sent if mining is successful.
-        let block = new Block( Date.now(), this.pendingTransactions );
-        block.previousHash = this.getLatestBlock().hash;
+        let block = new Block( Date.now(), this.pendingTransactions, this.getLatestBlock().hash );
+
         block.nonceBlockHash();
-        console.log( "Block Mined: ", block );
+        //console.log( "Block Mined: ", block );
        
 
         this.chain.push( block );
         this.pendingTransactions = [
             new Transaction( null, miningRewardAddress, this.miningReward )  // no "fromAddress" when creating (mining) a block
         ];
-
-        console.log( "New block added (mined)." );
-        console.log( "mining transaction added to pending: ", this.pendingTransactions );
     }
 
     // Put the current transaction into the "pending" array
@@ -240,8 +234,6 @@ class BlockChain{
 
             // Recompute the hash of the current block and make sure it matches
             if( currentBlock.hash !== currentBlock.calculateHash() ) {
-                console.log( "currentBlock.hash: ", currentBlock.hash );
-                console.log( "Recomputed hash  : ", currentBlock.calculateHash() );
                 return "No, bad block hash for block: " + i;
             }
 

@@ -32,19 +32,23 @@ const trans1 = new Transaction( walletAddress1, walletAddress2, 25 );
 trans1.signTransaction( objKey1 );
 bc.addTransaction( trans1 );
 
-// const trans2 = new Transaction( walletAddress2, walletAddress1, 40 );
-// trans2.signTransaction( objKey2 );
-// bc.addTransaction( trans2 );
+const trans2 = new Transaction( walletAddress2, walletAddress1, 40 );
+trans2.signTransaction( objKey2 );
+bc.addTransaction( trans2 );
 
 // Now the transactions must be added to a block (mined).
-console.log( "\nStarting the mining process ..." );
 bc.minePendingTransactions( walletAddress1 );
-console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
+console.log( "1st balance for miner1's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
+console.log( " Balance should be: -25+40= 15 " );
 
-console.log( "\nStarting the mining process again ..." );
+// This second mining activity includes the "mining reward" from the first mining activity to the block chain.
 bc.minePendingTransactions( walletAddress1 );
-console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
+console.log( "2nd balance for miner1's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
+console.log( " Balance should be: -25+40+100= 115 " );
 
+console.log( " " );
+console.log( "================================================" );
+console.log( " The final block chain is:")
 console.log( JSON.stringify( bc, null, 4 ) );
 console.log( "Is the blockchain valid?", bc.isChainValid() );
 
