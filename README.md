@@ -6,8 +6,8 @@ Richard Ay, November 2022
 ## Table of Contents
 * [Project Objective](#project-objective)
 * [Technologies Used](#technologies-used)
-* [Program Architecture](program-architecture)
-* [Block, Chain Description](block-chain-description)
+* [Program Architecture](#program-architecture)
+* [Block, Chain Description](#block-chain-description)
 * [Program Usage](#program-usage)
 * [Program Logic](#program-logic)
 * [References](#references)
