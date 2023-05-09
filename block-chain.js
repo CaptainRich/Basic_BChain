@@ -24,8 +24,8 @@ class Transaction{
         this.dataAmount  = dataAmount;
     }
 
-    // Compute the hash of this transaction
-    calculateHash(){
+    // Compute the hash of this transaction.  This transaction is what will be signed by the private key.
+    calculateTHash(){
         return SHA256( this.fromAddress + this.toAddress + this.dataAmount ).toString();
     }
 
@@ -37,7 +37,7 @@ class Transaction{
             throw new Error( 'You cannot sign a transaction that is not yours.');
         }
 
-        const hashTransaction = this.calculateHash();
+        const hashTransaction = this.calculateTHash();
         const signature       = signingKey.sign( hashTransaction, 'base64' );
         console.log( "Signing transaction with a hash value of: ", hashTransaction );
         console.log( "Signature for the hash is: ", signature );
@@ -52,16 +52,13 @@ class Transaction{
         // Assume if there is no "fromAddress" this transaction is from the 'mining' activity
         if(this.fromAddress === null ) return true;               
         
-        if( !this.signature || this.signature.length ===0 ) {
-            console.log( "FromAddress: ", this.fromAddress );
-            console.log( "ToAddress  : ", this.toAddress );
-            console.log( "Amount     : ", this.dataAmount );
+        if( !this.signature || this.signature.length === 0 ) {
             throw new Error( 'No signature in this transaction.' );
         }
 
         // Check that the transaction was signed with the correct key.
         const publicKey = ec.keyFromPublic( this.fromAddress, 'hex' );
-        return publicKey.verify( this.calculateHash(), this.signature );
+        return publicKey.verify( this.calculateTHash(), this.signature );
     }
 }
 
@@ -98,8 +95,6 @@ class Block{
         var needed_zeros = Array(num_zeros+1).join("0");
 
         // Get the hash of the block (same as 'calculateHash' above)
-        // var blockHash = SHA256( this.index + this.timeStamp + 
-        //                         this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
         var blockHash = this.calculateHash();
 
         // Get the leading 4 characters, which we ultimately want to be '0000'.
@@ -108,8 +103,6 @@ class Block{
         // As long as the leading 'num_zeros' characters are NOT all zeroes, increment the 'nonce' and try again.      
         while( leadingZ != needed_zeros ) {
             this.nonce++;
-            // blockHash = SHA256( this.index + this.timeStamp + 
-            //                     this.nonce + JSON.stringify(this.blockData) + this.previousHash ).toString();
             blockHash = this.calculateHash();
             leadingZ  = blockHash.slice(0,num_zeros);
         }
@@ -170,7 +163,7 @@ class BlockChain{
     minePendingTransactions( miningRewardAddress ){
 
         console.log( "In 'minePendingTransactions' ..." );
-        console.log( "pendingTransactions: \n" );
+        console.log( "Pending Transactions are: \n" );
         console.log( this.pendingTransactions );
 
 
@@ -178,7 +171,7 @@ class BlockChain{
         let block = new Block( Date.now(), this.pendingTransactions );
         block.previousHash = this.getLatestBlock().hash;
         block.nonceBlockHash();
-        console.log( "block mined: ", block );
+        console.log( "Block Mined: ", block );
        
 
         this.chain.push( block );
@@ -246,12 +239,14 @@ class BlockChain{
             }
 
             // Recompute the hash of the current block and make sure it matches
-            if( currentBlock.hash != currentBlock.calculateHash() ) {
+            if( currentBlock.hash !== currentBlock.calculateHash() ) {
+                console.log( "currentBlock.hash: ", currentBlock.hash );
+                console.log( "Recomputed hash  : ", currentBlock.calculateHash() );
                 return "No, bad block hash for block: " + i;
             }
 
             // Check that the current block's previous hash value matches the hash of the previous block.
-            if( currentBlock.previousHash != previousBlock.hash ) {
+            if( currentBlock.previousHash !== previousBlock.hash ) {
                 return "No, previous hash mismatch for block: " + i;
             }
 

@@ -45,6 +45,7 @@ console.log( "\nStarting the mining process again ..." );
 bc.minePendingTransactions( walletAddress1 );
 console.log( "Balance for miner's address is:", bc.getBalanceOfAddress( walletAddress1 ) );
 
+console.log( JSON.stringify( bc, null, 4 ) );
 console.log( "Is the blockchain valid?", bc.isChainValid() );
 
 
