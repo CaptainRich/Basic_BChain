@@ -1,7 +1,7 @@
 # Basic_Block_Chain
 
 
-Richard Ay, November 2022
+Richard Ay, (November 2022, *updated April/May 2023*)
 
 ## Table of Contents
 * [Project Objective](#project-objective)
@@ -63,6 +63,8 @@ The initial code to test the block formation and validity checks is commented ou
    c) Rewards & Transactions
 
    d) signing transactions
+
+   e) building a front-end (this video builds a new project in 'Angular', not implemented here)
 
 3) Block chain Basics and Cryptography, MIT Open Courseware: http://https://www.youtube.com/watch?v=zVqczFZr124
 
